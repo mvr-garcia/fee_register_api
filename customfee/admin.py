@@ -1,3 +1,4 @@
 from django.contrib import admin
+from customfee.models import CustomFeeInfo
 
-# Register your models here.
+admin.site.register(CustomFeeInfo)
