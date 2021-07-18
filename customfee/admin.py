@@ -1,4 +1,4 @@
 from django.contrib import admin
-from customfee.models import CustomFeeInfo
+from customfee.models import CustomFeeHistoric
 
-admin.site.register(CustomFeeInfo)
+admin.site.register(CustomFeeHistoric)
