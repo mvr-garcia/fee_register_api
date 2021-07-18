@@ -19,30 +19,40 @@ class Historic:
     
     def _add_custom_fee_id(self):
 
-        last_index = CustomFeeHistoric.objects.order_by('custom_fee_id').last()
+        last_register = (
+            CustomFeeHistoric.objects.order_by('custom_fee_id')
+            .last()
+        )
+        last_client_register = (
+            CustomFeeHistoric.objects.filter(client_id=self.client_id)
+            .order_by('custom_fee_id', 'expires_at')
+            .last()
+        )
         
         # Se não tiver nenhum será o primeiro registro
         if not CustomFeeHistoric.objects.all().exists():
             custom_fee_id = 1
-        # Se for uma chamada de create, será uma nova cf deste cliente
+        # Se for uma chamada de create, será uma nova ficha para o cliente
         elif self.register_type == 'create':
-            custom_fee_id = last_index.custom_fee_id + 1      
-        # Se for update, o cliente já deve estar no historico.obj
+            custom_fee_id = last_register.custom_fee_id + 1      
+        # Se for update é pq o cliente já teve uma custom_fee criada
         elif self.register_type == 'update':
             
-            # altera o expires_at do ultimo registro para a data atual
-            last_client_index = CustomFeeHistoric.objects.filter(client_id=self.client_id).order_by('custom_fee_id').last()
-            last_client_index.expires_at = datetime.now()
-            last_client_index.save()
+            # A cada update um novo registro no histórico é criado, assim
+            # alteramos o expires_at do ultimo registro para a data atual para
+            # fechar o periodo daquele registro e iniciamos um novo com a data
+            # de criação do dia e a nova data de exxpiração.    
+            last_client_register.expires_at = datetime.now()
+            last_client_register.save()
 
-            # Como é uma atualização o index deve ser o mesmo anterior para
-            # criar um histórico linear dessa 'ficha'
-            last_client_index = CustomFeeHistoric.objects.filter(client_id=self.client_id).order_by('custom_fee_id', 'expires_at').last()
-            custom_fee_id = last_client_index.custom_fee_id
+            # Como é uma atualização de uma custom_fee criada no passado
+            # utilizamos o mesmo index da anterior para exista um histórico
+            # dos updates daquela ficha.
+            custom_fee_id = last_client_register.custom_fee_id
         
         return custom_fee_id
 
-    def _historic_maker(self):
+    def _historic_register(self):
 
         self._format_date()
         

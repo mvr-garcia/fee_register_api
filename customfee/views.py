@@ -12,7 +12,7 @@ class CustomFeeCreate(APIView):
 
     def post(self, request, *args, **kwargs):
 
-        Historic(request)._historic_maker()
+        Historic(request)._historic_register()
 
         return Response({
             "timestamp": datetime.now(),
